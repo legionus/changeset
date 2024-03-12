@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "changeset"
+version = "1"
+description = "A highlevel utility for easy patchset creation"
+readme = "README.rst"
+keywords = ["git", "patch", "email", "patchset", "changeset"]
+license = {file = "LICENSE"}
+authors = [
+    {name = "Alexey Gladkov", email="legion@kernel.org"},
+]
+requires-python = ">=3.11"
+classifiers = [
+    "Environment :: Console",
+    "Operating System :: POSIX :: Linux",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Topic :: Communications :: Email",
+    "Topic :: Software Development",
+    "Topic :: Utilities",
+]
+dynamic = ["dependencies", "optional-dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.in"] }
+
+[tool.pip-tools]
+generate_hashes = true
+
+[project.urls]
+Homepage = "https://github.com/legionus/changeset.git"
+Repository = "https://github.com/legionus/changeset.git"
+
+[project.scripts]
+cs = "changeset.command:cmd"
+
+[tool.bumpversion]
+current_version = "1"
+files = [
+    {filename = "src/changeset/__init__.py"},
+]
