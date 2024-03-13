@@ -7,6 +7,7 @@ __author__ = "Alexey Gladkov <legion@kernel.org>"
 import argparse
 import sys
 import logging
+import textwrap
 import importlib
 
 from typing import Any
@@ -20,6 +21,19 @@ def subcmd(subname: str, cmdargs: argparse.Namespace) -> int:
     mod = importlib.import_module(subname)
     ret: int = mod.main(cmdargs)
     return ret
+
+
+def add_parser(parser: Any, name: str, desc: str) -> Any:
+    sp = parser.add_parser(
+        name,
+        formatter_class=argparse.RawTextHelpFormatter,
+        description=desc,
+        help=desc,
+        epilog="Report bugs to authors.",
+        add_help=False,
+    )
+    sp.set_defaults(func=lambda args: subcmd(name, args))
+    return sp
 
 
 def add_common_arguments(parser: argparse.ArgumentParser) -> None:
@@ -47,29 +61,23 @@ def add_common_arguments(parser: argparse.ArgumentParser) -> None:
         version=cs.__VERSION__,
     )
     parser.add_argument(
-        "-h", "--help", action="help", help="show this help message and exit."
+        "-h",
+        "--help",
+        action="help",
+        help="show this help message and exit.",
     )
 
 
 def setup_parser_list(parser: Any) -> None:
-    """
-    Shows a list of known patchsets. The current patchset will be marked with an
-    asterisk. The list also shows the base and last commits as well as the number of
-    commits.
-    """
-    sp = parser.add_parser(
-        "list",
-        description=setup_parser_list.__doc__,
-        help=setup_parser_list.__doc__,
-        epilog="Report bugs to authors.",
-        add_help=False,
-    )
-    sp.set_defaults(func=lambda args: subcmd("list", args))
+    sp = add_parser(parser, "list", textwrap.dedent("""
+    Shows a list of known patchsets. The current patchset will be marked. The
+    list also shows the base and last commits as well as the number of commits.
+    """))
     sp.add_argument(
         "--versions",
         dest="versions",
         action="store_true",
-        help="show all versions of current patchset.",
+        help="show all versions of each patchset in the list.",
     )
     sp.add_argument(
         "--archived",
@@ -81,53 +89,63 @@ def setup_parser_list(parser: Any) -> None:
 
 
 def setup_parser_cover(parser: Any) -> None:
-    """
+    sp = add_parser(parser, "cover", textwrap.dedent("""
     Shows or changes the description of the patchset. This description
     will be used for cover-letter.
-    """
-    sp = parser.add_parser(
-        "cover",
-        description=setup_parser_cover.__doc__,
-        help=setup_parser_cover.__doc__,
-        epilog="Report bugs to authors.",
-        add_help=False,
+    """))
+    sp.add_argument(
+        "--fix",
+        dest="fix",
+        action="store_true",
+        help=textwrap.dedent(
+            """\
+            calculates and sets the cover tag to the beginning of the patchset.
+            """
+        ),
     )
-    sp.set_defaults(func=lambda args: subcmd("cover", args))
-    sp.add_argument("--fix", dest="fix", action="store_true", help="fix cover tag.")
-    sp.add_argument("name", nargs="?", default="", help="patchset name.")
+    sp.add_argument(
+        "patchset",
+        nargs="?",
+        default="",
+        help=textwrap.dedent(
+            """\
+            patchset name (if not specified, the current name will be used).
+            """
+        ),
+    )
     add_common_arguments(sp)
 
 
 def setup_parser_export(parser: Any) -> None:
-    """
-    Prepares patches for e-mail submission. The <options> will be passed to
-    git-format-patch(1).
-    """
-    sp = parser.add_parser(
-        "export",
-        description=setup_parser_export.__doc__,
-        help=setup_parser_export.__doc__,
-        epilog="Report bugs to authors.",
-        add_help=False,
-    )
-    sp.set_defaults(func=lambda args: subcmd("export", args))
+    sp = add_parser(parser, "export", textwrap.dedent("""
+    Prepares patches for e-mail submission. The description for the patchset
+    will be taken from the cover tag (see `cover' subcommand). The To and Сс
+    fields will be taken from the config (see `config' subcommad).
+    """))
     sp.add_argument(
         "--resend",
         dest="tag_resend",
         action="store_true",
-        help="add RESEND tag to the subject.",
+        help="shortcut to add `RESEND' tag to the subject.",
     )
     sp.add_argument(
-        "--rfc", dest="tag_rfc", action="store_true", help="add RFC tag to the subject."
+        "--rfc",
+        dest="tag_rfc",
+        action="store_true",
+        help="shortcut to add `RFC' tag to the subject.",
     )
     sp.add_argument(
         "--in-reply-to",
         dest="in_reply_to",
         action="store",
         metavar="<message-id>",
-        help="""make the first mail appear as a reply to the given
-                    <message-id>, which avoids breaking threads to provide a new
-                    patch series.""",
+        help=textwrap.dedent(
+            """\
+            make the first mail appear as a reply to the given
+            <message-id>, which avoids breaking threads to provide a new
+            patch series.
+            """
+        ),
     )
     sp.add_argument(
         "-o",
@@ -136,45 +154,46 @@ def setup_parser_export(parser: Any) -> None:
         action="store",
         default="",
         metavar="<DIR>",
-        help="""use <DIR> to store the resulting files (default:
-                    patches/PATCHSET/).""",
+        help=textwrap.dedent(
+            """\
+            use <DIR> to store the resulting files (default:
+            patches/PATCHSET/).
+            """
+        ),
     )
-    sp.add_argument("patchname", nargs="?", default="", help="patchset name.")
+    sp.add_argument(
+        "patchname",
+        nargs="?",
+        default="",
+        help=textwrap.dedent(
+            """\
+            patchset name (if not specified, the current name will be used).
+            """
+        ),
+    )
     add_common_arguments(sp)
 
 
 def setup_parser_send(parser: Any) -> None:
-    """
+    sp = add_parser(parser, "send", textwrap.dedent("""
     Sends patches by e-mail. It takes the patches given on the command line and
-    emails them out. Patches can be specified as files, directories (which will send
-    all files in the directory).
-    """
-    sp = parser.add_parser(
-        "send",
-        description=setup_parser_send.__doc__,
-        help=setup_parser_send.__doc__,
-        epilog="Report bugs to authors.",
-        add_help=False,
+    emails them out. Patches can be specified as files, directories (which will
+    send all files in the directory).
+    """))
+    sp.add_argument(
+        "filename",
+        nargs="+",
+        help="patch-file or directory with patches.",
     )
-    sp.set_defaults(func=lambda args: subcmd("send", args))
-    sp.add_argument("filename", nargs="+", help="patch-file or directory with patches.")
     add_common_arguments(sp)
 
 
 def setup_parser_create(parser: Any) -> None:
-    """
+    sp = add_parser(parser, "create", textwrap.dedent("""
     Creates branch for a new patchset. The new branch will be created with v1
-    version. the version and cover can be overwritten if commits are imported from
-    mbox file.
-    """
-    sp = parser.add_parser(
-        "create",
-        description=setup_parser_create.__doc__,
-        help=setup_parser_create.__doc__,
-        epilog="Report bugs to authors.",
-        add_help=False,
-    )
-    sp.set_defaults(func=lambda args: subcmd("create", args))
+    version. the version and cover can be overwritten if commits are imported
+    from mbox file.
+    """))
     sp.add_argument(
         "-N",
         "--start-number",
@@ -198,55 +217,59 @@ def setup_parser_create(parser: Any) -> None:
         action="store_true",
         help="create a new version and increment minor (internal) version number.",
     )
-    sp.add_argument("newname", nargs="?", default="", help="new patchset name.")
+    sp.add_argument(
+        "newname",
+        nargs="?",
+        default="",
+        help=textwrap.dedent(
+            """\
+            new patchset name.
+            """
+        ),
+    )
     add_common_arguments(sp)
 
 
 def setup_parser_remove(parser: Any) -> None:
-    """
+    sp = add_parser(parser, "remove", textwrap.dedent("""
     Permanently remove all versions of patchset or just single version.
-    """
-    sp = parser.add_parser(
-        "remove",
-        description=setup_parser_remove.__doc__,
-        help=setup_parser_remove.__doc__,
-        epilog="Report bugs to authors.",
-        add_help=False,
+    """))
+    sp.add_argument(
+        "patchname",
+        nargs="+",
+        help="patchset name.",
     )
-    sp.set_defaults(func=lambda args: subcmd("remove", args))
-    sp.add_argument("patchname", nargs="+", help="patchset name.")
     add_common_arguments(sp)
 
 
 def setup_parser_config(parser: Any) -> None:
-    """
+    sp = add_parser(parser, "config", textwrap.dedent("""
     Changes options of the patchset. You can always change or delete To and Cc
     fields using the `git config -e'.
-    """
-    sp = parser.add_parser(
-        "config",
-        description=setup_parser_config.__doc__,
-        help=setup_parser_config.__doc__,
-        epilog="Report bugs to authors.",
-        add_help=False,
+    """))
+    sp.add_argument(
+        "patchname",
+        nargs="?",
+        default="",
+        help=textwrap.dedent(
+            """\
+            patchset name (if not specified, the current name will be used).
+            """
+        ),
     )
-    sp.set_defaults(func=lambda args: subcmd("config", args))
-    sp.add_argument("patchname", nargs="?", default="", help="patchset name.")
     add_common_arguments(sp)
 
 
 def setup_parser() -> argparse.ArgumentParser:
-    epilog = "Report bugs to authors."
-
-    desc = """\
-This is highlevel utility for easy patchset creation. Each patchset has
-a version and description.
-"""
+    desc = textwrap.dedent("""
+    This is highlevel utility for easy patchset creation. The utility allows to
+    organize the creation of a set of patches and their versioning.
+    """)
     parser = argparse.ArgumentParser(
         prog="changeset",
         formatter_class=argparse.RawTextHelpFormatter,
         description=desc,
-        epilog=epilog,
+        epilog="Report bugs to authors.",
         add_help=False,
         allow_abbrev=True,
     )

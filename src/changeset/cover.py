@@ -59,8 +59,8 @@ def get_cover_lines(covertag: str) -> List[str]:
 def main(cmdargs: argparse.Namespace) -> int:
     ref: cs.PatchRef | cs.Error
 
-    if len(cmdargs.name) > 0:
-        ref = cs.PatchRef(cmdargs.name)
+    if len(cmdargs.patchset) > 0:
+        ref = cs.PatchRef(cmdargs.patchset)
     else:
         ref = cs.get_current_patchref()
 
