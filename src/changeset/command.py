@@ -123,6 +123,19 @@ def setup_parser_export(parser: Any) -> None:
     fields will be taken from the config (see `config' subcommad).
     """))
     sp.add_argument(
+        "--in-reply-to",
+        dest="in_reply_to",
+        action="store",
+        metavar="<message-id>",
+        help=textwrap.dedent(
+            """\
+            make the first mail appear as a reply to the given
+            <message-id>, which avoids breaking threads to provide a new
+            patch series.
+            """
+        ),
+    )
+    sp.add_argument(
         "--resend",
         dest="tag_resend",
         action="store_true",
@@ -135,15 +148,14 @@ def setup_parser_export(parser: Any) -> None:
         help="shortcut to add `RFC' tag to the subject.",
     )
     sp.add_argument(
-        "--in-reply-to",
-        dest="in_reply_to",
-        action="store",
-        metavar="<message-id>",
+        "-t",
+        "--tag",
+        dest="tags",
+        action="append",
+        metavar="<TAG>",
         help=textwrap.dedent(
             """\
-            make the first mail appear as a reply to the given
-            <message-id>, which avoids breaking threads to provide a new
-            patch series.
+            add <TAG> to the subject (like a "[PATCH <TAG> v1 0/0]").
             """
         ),
     )

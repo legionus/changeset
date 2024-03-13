@@ -39,6 +39,11 @@ def add_tags(args: List[str], cmdargs: argparse.Namespace, patchname: str) -> No
     if cmdargs.tag_resend:
         tags += ["RESEND"]
 
+    tags += ["PATCH"]
+
+    if cmdargs.tags:
+        tags += cmdargs.tags
+
     tags += cs.git_get_command_lines(
         ["config", "--get-all", f"branch.{patchname}.tags"]
     )
