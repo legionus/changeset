@@ -6,6 +6,11 @@ __author__ = "Alexey Gladkov <legion@kernel.org>"
 
 import argparse
 
+from typing import Iterable
+
+from termcolor import colored
+from termcolor._types import Attribute
+
 import changeset as cs
 
 logger = cs.logger
@@ -29,15 +34,19 @@ def main(cmdargs: argparse.Namespace) -> int:
         elif not ref.archived:
             continue
 
+        attrs: Iterable[Attribute] = []
+
         if cur_fullname == ref.fullname:
             mark = ">"
+            attrs = ["bold"]
         else:
             mark = " "
 
         print(
-            f"{mark} {ref.patch_base}..{ref.object}",
-            f"{ref.count:>7}",
-            f"patchset/{ref.patch_name}/{ref.patch_type}{ref.patch_vers}",
+            colored(f"{mark}", attrs=attrs),
+            colored(f"{ref.patch_base}..{ref.object}", "yellow", attrs=attrs),
+            colored(f"{ref.count:>7}", attrs=attrs),
+            colored(f"patchset/{ref.patch_name}/{ref.patch_type}{ref.patch_vers}", attrs=attrs),
         )
 
         if not cmdargs.versions:
@@ -45,16 +54,19 @@ def main(cmdargs: argparse.Namespace) -> int:
 
         for ver in reversed(sorted(ref.prev_vers.keys())):
             prv_ref = ref.prev_vers[ver]
+            attrs = ["dark"]
 
             if cur_fullname == prv_ref.fullname:
                 mark = ">"
+                attrs = ["bold"]
             else:
                 mark = " "
 
             print(
-                f"{mark}   {prv_ref.patch_base}..{prv_ref.object}",
-                f"{prv_ref.count:>5}",
-                f"patchset/{prv_ref.patch_name}/{prv_ref.patch_type}{prv_ref.patch_vers}",
+                colored(f"{mark}", attrs=attrs), " ",
+                colored(f"{prv_ref.patch_base}..{prv_ref.object}", "yellow", attrs=attrs),
+                colored(f"{prv_ref.count:>5}", attrs=attrs),
+                colored(f"patchset/{prv_ref.patch_name}/{prv_ref.patch_type}{prv_ref.patch_vers}", attrs=attrs),
             )
 
     return cs.EX_SUCCESS
