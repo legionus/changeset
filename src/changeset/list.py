@@ -17,6 +17,8 @@ logger = cs.logger
 
 
 def main(cmdargs: argparse.Namespace) -> int:
+    cs.cache_covertags()
+
     cur_fullname = ""
     curref = cs.get_current_patchref()
 

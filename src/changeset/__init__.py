@@ -16,7 +16,9 @@ EX_SUCCESS = 0  # Successful exit status.
 EX_FAILURE = 1  # Failing exit status.
 
 logger = logging.getLogger("patchset")
+
 gitdir: Optional[str] = None
+covertags: Dict[str,Tuple[str,str]] = {}
 
 
 class Error(Exception):
@@ -126,6 +128,9 @@ class PatchRef(NameRef):
 
     @property
     def patch_base(self) -> str:
+        if not self._base:
+            if self.covertag in covertags:
+                self._base = covertags[self.covertag][1]
         if not self._base:
             lines = git_get_command_lines(
                 ["rev-parse", "--short", f"{self.covertag}^{{}}"]
@@ -276,6 +281,20 @@ def get_list_patchrefs(pattern: str) -> Dict[str, PatchRef]:
             latest[ref.patch_name] = ref
 
     return latest
+
+
+def cache_covertags() -> None:
+    for line in git_get_command_lines(
+            [
+                "tag",
+                "--list",
+                "--format",
+                "%(objectname:short) %(*objectname:short) %(refname)",
+                "patchset/*/cover",
+            ]
+        ):
+        sp = line.split(" ", maxsplit=3)
+        covertags[sp[2]] = (sp[0], sp[1])
 
 
 def get_editor() -> str | Error:
