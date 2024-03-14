@@ -275,7 +275,14 @@ def setup_parser_config(parser: Any) -> None:
 def setup_parser() -> argparse.ArgumentParser:
     desc = textwrap.dedent("""
     This is highlevel utility for easy patchset creation. The utility allows to
-    organize the creation of a set of patches and their versioning.
+    organize the creation of a set of patches and their versioning. Typically
+    the workflow consists of the following steps:
+
+     * start a new topical branch using `cs create patchname`.
+     * add commits as usual and work with them using `git rebase -i`.
+     * prepare the cover letter using `cs cover`.
+     * prepare the list of patches using `cs export`.
+     * send patches to upstream using `cs send`.
     """)
     parser = argparse.ArgumentParser(
         prog="changeset",
@@ -290,13 +297,13 @@ def setup_parser() -> argparse.ArgumentParser:
 
     subparsers = parser.add_subparsers(dest="subcmd", help="")
 
-    setup_parser_list(subparsers)
     setup_parser_create(subparsers)
     setup_parser_remove(subparsers)
     setup_parser_config(subparsers)
     setup_parser_cover(subparsers)
     setup_parser_export(subparsers)
     setup_parser_send(subparsers)
+    setup_parser_list(subparsers)
 
     return parser
 
