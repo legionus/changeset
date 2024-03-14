@@ -283,6 +283,9 @@ def get_editor() -> str | Error:
         editor = os.getenv(name)
         if editor:
             return editor
+    lines = git_get_command_lines(["config", "--get", "core.editor"])
+    if len(lines) == 1:
+        return lines[0]
     return Error("Unable to find editor")
 
 
