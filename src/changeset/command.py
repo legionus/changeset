@@ -336,7 +336,7 @@ if __name__ == "__main__":
     try:
         if cs.__VERSION__.find("-dev") > 0:
             ecode, short, _ = cs.git_run_command(["rev-parse", "--short", "HEAD"])
-            if ecode == 0:
+            if ecode == cs.EX_SUCCESS:
                 ver = cs.__VERSION__
                 sha = short.strip()
                 cs.__VERSION__ = f"{ver}-{sha:.5s}"

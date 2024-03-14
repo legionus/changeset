@@ -31,7 +31,7 @@ def create_covertag(covertag: str, commit: str, msg: str) -> Optional[cs.Error]:
         ["tag", "--annotate", "--force", "--file=-", covertag, commit],
         stdin=msg.encode(errors="replace"),
     )
-    if ecode != 0:
+    if ecode != cs.EX_SUCCESS:
         return cs.Error(err)
     return None
 

@@ -239,14 +239,14 @@ def git_get_describe(objname: str) -> NameRef | Error:
 
 def get_current_nameref() -> NameRef | Error:
     ecode, refname, err = git_run_command(["symbolic-ref", "HEAD"])
-    if ecode != 0 or not refname.startswith("refs/heads/"):
+    if ecode != EX_SUCCESS or not refname.startswith("refs/heads/"):
         return Error(err)
     return NameRef(refname)
 
 
 def get_current_patchref() -> PatchRef | Error:
     ecode, refname, err = git_run_command(["symbolic-ref", "HEAD"])
-    if ecode != 0 or not refname.startswith("refs/heads/"):
+    if ecode != EX_SUCCESS or not refname.startswith("refs/heads/"):
         return Error(err)
     return PatchRef(refname)
 

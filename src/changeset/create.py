@@ -77,7 +77,7 @@ def main(cmdargs: argparse.Namespace) -> int:
     newbranch = f"patchset/{cmdargs.newname}/v{cmdargs.newversion}"
 
     ecode, _, err = cs.git_run_command(["switch", "--create", newbranch])
-    if ecode != 0:
+    if ecode != cs.EX_SUCCESS:
         cs.show_critical(err)
         logger.critical("Unable to create new branch: %s", newbranch)
         return ecode

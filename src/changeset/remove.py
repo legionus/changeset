@@ -17,7 +17,7 @@ def delete_patchref(ref: cs.PatchRef) -> Optional[cs.PatchRefError]:
     ecode, out, err = cs.git_run_command(
         ["branch", "--delete", "--force", ref.fullname[len("refs/heads/") :]]
     )
-    if ecode != 0:
+    if ecode != cs.EX_SUCCESS:
         return cs.PatchRefError(err)
 
     cs.git_run_command(["tag", "--delete", ref.covertag[len("refs/tags/") :]])

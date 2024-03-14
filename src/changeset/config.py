@@ -48,7 +48,7 @@ def update_gitconfig(tmpfile: str, patchname: str) -> int:
                 value = " ".join(re.split(r"\s+", value))
 
             ecode, _, err = cs.git_run_command(["config", "--add", name, value])
-            if ecode != 0:
+            if ecode != cs.EX_SUCCESS:
                 logger.critical(err)
                 return cs.EX_FAILURE
 
