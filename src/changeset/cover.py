@@ -51,6 +51,8 @@ def get_cover_lines(covertag: str) -> List[str]:
     lines = []
     if out:
         for line in out.split("\n"):
+            if line == "---":
+                break
             lines.append(line)
     return lines
 
