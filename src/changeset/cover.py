@@ -95,6 +95,9 @@ def main(cmdargs: argparse.Namespace) -> int:
 
         coverobj = nref.object
 
+    elif cmdargs.use_commit:
+        coverobj = cmdargs.use_commit
+
     with tempfile.NamedTemporaryFile(mode="w") as fp:
         fp.write(covermsg)
         fp.flush()

@@ -111,6 +111,18 @@ def setup_parser_cover(parser: Any) -> None:
         ),
     )
     sp.add_argument(
+        "--use-commit",
+        dest="use_commit",
+        action="store",
+        default="",
+        metavar="COMMIT",
+        help=textwrap.dedent(
+            """\
+            put the cover tag on COMMIT without any analysis.
+            """
+        ),
+    )
+    sp.add_argument(
         "patchset",
         nargs="?",
         default="",
