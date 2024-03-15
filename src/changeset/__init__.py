@@ -338,6 +338,19 @@ def edit_file(filename: str) -> bool:
             oldinfo.st_size != newinfo.st_size)
 
 
+def create_tag(tagname: str, commit: str, msg: str) -> Optional[Error]:
+    if tagname.startswith("refs/tags/"):
+        tagname = tagname[len("refs/tags/") :]
+
+    ecode, _, err = git_run_command(
+        ["tag", "--annotate", "--force", "--file=-", tagname, commit],
+        stdin=msg.encode(errors="replace"),
+    )
+    if ecode != EX_SUCCESS:
+        return Error(err)
+    return None
+
+
 def setup_logger(logger: logging.Logger, level: int, fmt: str) -> logging.Logger:
     formatter = logging.Formatter(fmt=fmt, datefmt="%H:%M:%S")
 

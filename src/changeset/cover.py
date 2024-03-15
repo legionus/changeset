@@ -7,7 +7,7 @@ __author__ = "Alexey Gladkov <legion@kernel.org>"
 import argparse
 import tempfile
 
-from typing import Optional, List
+from typing import List
 
 import changeset as cs
 
@@ -20,19 +20,6 @@ default_covermsg = """\
 
 ---
 """
-
-
-def create_covertag(covertag: str, commit: str, msg: str) -> Optional[cs.Error]:
-    if covertag.startswith("refs/tags/"):
-        covertag = covertag[len("refs/tags/") :]
-
-    ecode, _, err = cs.git_run_command(
-        ["tag", "--annotate", "--force", "--file=-", covertag, commit],
-        stdin=msg.encode(errors="replace"),
-    )
-    if ecode != cs.EX_SUCCESS:
-        return cs.Error(err)
-    return None
 
 
 def get_cover_lines(covertag: str) -> List[str]:
@@ -87,7 +74,7 @@ def main(cmdargs: argparse.Namespace) -> int:
             logger.critical(nref.message)
             return cs.EX_FAILURE
 
-        res = create_covertag(ref.covertag, nref.object, covermsg)
+        res = cs.create_tag(ref.covertag, nref.object, covermsg)
 
         if isinstance(res, cs.Error):
             logger.critical(res.message)
@@ -109,7 +96,7 @@ def main(cmdargs: argparse.Namespace) -> int:
                 covermsg = f.read().strip()
 
     if covermsg_changed:
-        res = create_covertag(ref.covertag, coverobj, covermsg)
+        res = cs.create_tag(ref.covertag, coverobj, covermsg)
 
         if isinstance(res, cs.Error):
             logger.critical(res.message)

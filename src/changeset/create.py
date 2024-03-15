@@ -7,7 +7,7 @@ __author__ = "Alexey Gladkov <legion@kernel.org>"
 import argparse
 
 import changeset as cs
-from changeset.cover import create_covertag, get_cover_lines
+from changeset.cover import get_cover_lines
 
 logger = cs.logger
 
@@ -84,7 +84,7 @@ def main(cmdargs: argparse.Namespace) -> int:
 
     logger.info("Switched to a new branch '%s'", newbranch)
 
-    res = create_covertag(f"{newbranch}/cover", "HEAD^{}", covermsg)
+    res = cs.create_tag(f"{newbranch}/cover", "HEAD^{}", covermsg)
 
     if isinstance(res, cs.Error):
         cs.show_critical(res.message)
