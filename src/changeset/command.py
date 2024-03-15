@@ -38,6 +38,13 @@ def add_parser(parser: Any, name: str, desc: str) -> Any:
 
 def add_common_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
+        "--git-dir",
+        dest="gitdir",
+        action="store",
+        default=None,
+        help="set the path to the repository (`.git' directory).",
+    )
+    parser.add_argument(
         "-v",
         "--verbose",
         dest="verbose",
@@ -328,6 +335,9 @@ def cmd() -> int:
     cmdargs = parser.parse_args()
 
     setup_logger(cmdargs)
+
+    if cmdargs.gitdir:
+        cs.gitdir = cmdargs.gitdir
 
     if "func" not in cmdargs:
         parser.print_help()
