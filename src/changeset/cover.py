@@ -4,7 +4,6 @@
 
 __author__ = "Alexey Gladkov <legion@kernel.org>"
 
-import os
 import argparse
 import tempfile
 
@@ -94,24 +93,15 @@ def main(cmdargs: argparse.Namespace) -> int:
 
         coverobj = nref.object
 
-    editor = cs.get_editor()
-
-    if isinstance(editor, cs.Error):
-        logger.critical(editor.message)
-        return cs.EX_FAILURE
-
     with tempfile.NamedTemporaryFile(mode="w") as fp:
         fp.write(covermsg)
         fp.flush()
 
-        oldinfo = os.stat(fp.name)
-        cs.run_command([editor, fp.name])
-        newinfo = os.stat(fp.name)
+        covermsg_changed = cs.edit_file(fp.name)
 
-        if oldinfo.st_mtime != newinfo.st_mtime or oldinfo.st_size != newinfo.st_size:
+        if covermsg_changed:
             with open(fp.name, mode="r", encoding="utf-8") as f:
                 covermsg = f.read().strip()
-                covermsg_changed = True
 
     if covermsg_changed:
         res = create_covertag(ref.covertag, coverobj, covermsg)

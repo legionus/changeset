@@ -308,6 +308,21 @@ def get_editor() -> str | Error:
     return Error("Unable to find editor")
 
 
+def edit_file(filename: str) -> bool:
+    editor = get_editor()
+
+    if isinstance(editor, Error):
+        logger.critical(editor.message)
+        return False
+
+    oldinfo = os.stat(filename)
+    run_command([editor, filename])
+    newinfo = os.stat(filename)
+
+    return (oldinfo.st_mtime != newinfo.st_mtime or \
+            oldinfo.st_size != newinfo.st_size)
+
+
 def setup_logger(logger: logging.Logger, level: int, fmt: str) -> logging.Logger:
     formatter = logging.Formatter(fmt=fmt, datefmt="%H:%M:%S")
 

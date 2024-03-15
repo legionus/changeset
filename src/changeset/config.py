@@ -4,7 +4,6 @@
 
 __author__ = "Alexey Gladkov <legion@kernel.org>"
 
-import os
 import re
 import argparse
 import tempfile
@@ -117,12 +116,6 @@ def main(cmdargs: argparse.Namespace) -> int:
             cs.git_get_command_lines(["config", "--get-all", f"branch.{fullname}.cc"]),
         )
 
-    editor = cs.get_editor()
-
-    if isinstance(editor, cs.Error):
-        logger.critical(editor.message)
-        return cs.EX_FAILURE
-
     ret = cs.EX_SUCCESS
 
     with tempfile.NamedTemporaryFile(mode="w", suffix=".ini") as fp:
@@ -176,12 +169,11 @@ def main(cmdargs: argparse.Namespace) -> int:
         fp.write("#\n")
         fp.flush()
 
-        oldinfo = os.stat(fp.name)
-        cs.run_command([editor, fp.name])
-        newinfo = os.stat(fp.name)
-
-        if oldinfo.st_mtime != newinfo.st_mtime or oldinfo.st_size != newinfo.st_size:
+        if cs.edit_file(fp.name):
             ret = update_gitconfig(fp.name, fullname)
+            cs.show_warning("Config has been updated.")
+        else:
+            cs.show_warning("Config has not changed.")
 
     return ret
 
