@@ -234,21 +234,36 @@ def git_get_describe(objname: str) -> NameRef | Error:
     )
     if len(lines) == 0:
         return Error(f"Unable to describe object: {objname}")
-    return NameRef(lines[0])
+    try:
+        return NameRef(lines[0])
+    except Error as er:
+        return er
+    except Exception as ex:
+        return Error(str(ex))
 
 
 def get_current_nameref() -> NameRef | Error:
     ecode, refname, err = git_run_command(["symbolic-ref", "HEAD"])
     if ecode != EX_SUCCESS or not refname.startswith("refs/heads/"):
         return Error(err)
-    return NameRef(refname)
+    try:
+        return NameRef(refname)
+    except Error as er:
+        return er
+    except Exception as ex:
+        return Error(str(ex))
 
 
 def get_current_patchref() -> PatchRef | Error:
     ecode, refname, err = git_run_command(["symbolic-ref", "HEAD"])
     if ecode != EX_SUCCESS or not refname.startswith("refs/heads/"):
         return Error(err)
-    return PatchRef(refname)
+    try:
+        return PatchRef(refname)
+    except Error as er:
+        return er
+    except Exception as ex:
+        return Error(str(ex))
 
 
 def get_list_patchrefs(pattern: str) -> Dict[str, PatchRef]:
