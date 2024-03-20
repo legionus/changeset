@@ -156,6 +156,27 @@ class PatchRef(NameRef):
         return self._count
 
 
+def normalize_version(version: str) -> str:
+    vers = []
+
+    for ver in version.split("."):
+        if len(ver) == 0:
+            ver = "0"
+        vers.append(abs(int(ver)))
+
+    if len(vers) > 2:
+        vers = vers[:2]
+    elif len(vers) == 1:
+        vers.append(0)
+    elif len(vers) == 0:
+        vers = [1, 0]
+
+    if vers[0] == 0:
+        vers[0] = 1
+
+    return ".".join(map(str, vers))
+
+
 def run_command(cmdargs: List[str], rundir: Optional[str] = None) -> int:
     if rundir:
         logger.debug("changing dir to %s", rundir)

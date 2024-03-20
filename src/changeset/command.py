@@ -291,6 +291,50 @@ def setup_parser_config(parser: Any) -> None:
     add_common_arguments(sp)
 
 
+def setup_parser_import(parser: Any) -> None:
+    sp = add_parser(parser, "import", textwrap.dedent("""
+    Imports a patchset from a set of files obtained by the git-format-patch(1)
+    utility.
+    """))
+    sp.add_argument(
+        "--print",
+        dest="print_tree",
+        action="store_true",
+        help="print a thread of patches and exit.",
+    )
+    sp.add_argument(
+        "-b",
+        "--branch-point",
+        dest="start_point",
+        action="store",
+        default="HEAD",
+        metavar="COMMIT",
+        help="the starting point for the new branch.",
+    )
+    sp.add_argument(
+        "-s",
+        "--signoff",
+        dest="signoff",
+        action="store_true",
+        help=textwrap.dedent(
+            """\
+            add a Signed-off-by trailer to the commit message, using the
+            committer identity of yourself.
+            """
+        ),
+    )
+    sp.add_argument(
+        "patchname",
+        help="patchset name.",
+    )
+    sp.add_argument(
+        "filename",
+        nargs="+",
+        help="patch-file or directory with patches.",
+    )
+    add_common_arguments(sp)
+
+
 def setup_parser() -> argparse.ArgumentParser:
     desc = textwrap.dedent("""
     This is highlevel utility for easy patchset creation. The utility allows to
@@ -320,6 +364,7 @@ def setup_parser() -> argparse.ArgumentParser:
     setup_parser_remove(subparsers)
     setup_parser_config(subparsers)
     setup_parser_cover(subparsers)
+    setup_parser_import(subparsers)
     setup_parser_export(subparsers)
     setup_parser_send(subparsers)
     setup_parser_list(subparsers)

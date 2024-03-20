@@ -12,27 +12,6 @@ from changeset.cover import get_cover_lines
 logger = cs.logger
 
 
-def normalize_version(version: str) -> str:
-    vers = []
-
-    for ver in version.split("."):
-        if len(ver) == 0:
-            ver = "0"
-        vers.append(abs(int(ver)))
-
-    if len(vers) > 2:
-        vers = vers[:2]
-    elif len(vers) == 1:
-        vers.append(0)
-    elif len(vers) == 0:
-        vers = [1, 0]
-
-    if vers[0] == 0:
-        vers[0] = 1
-
-    return ".".join(map(str, vers))
-
-
 def main(cmdargs: argparse.Namespace) -> int:
     covermsg = cs.cover.default_covermsg
 
@@ -72,7 +51,7 @@ def main(cmdargs: argparse.Namespace) -> int:
         logger.critical("Empty branch name is not allowed.")
         return cs.EX_FAILURE
 
-    cmdargs.newversion = normalize_version(cmdargs.newversion)
+    cmdargs.newversion = cs.normalize_version(cmdargs.newversion)
 
     newbranch = f"patchset/{cmdargs.newname}/v{cmdargs.newversion}"
 
