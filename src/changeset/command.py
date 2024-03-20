@@ -10,7 +10,7 @@ import logging
 import textwrap
 import importlib
 
-from typing import Any
+from typing import List, Any
 
 import changeset as cs
 
@@ -23,9 +23,10 @@ def subcmd(subname: str, cmdargs: argparse.Namespace) -> int:
     return ret
 
 
-def add_parser(parser: Any, name: str, desc: str) -> Any:
+def add_parser(parser: Any, name: str, aliases: List[str], desc: str) -> Any:
     sp = parser.add_parser(
         name,
+        aliases=aliases,
         formatter_class=argparse.RawTextHelpFormatter,
         description=desc,
         help=desc,
@@ -76,7 +77,7 @@ def add_common_arguments(parser: argparse.ArgumentParser) -> None:
 
 
 def setup_parser_list(parser: Any) -> None:
-    sp = add_parser(parser, "list", textwrap.dedent("""
+    sp = add_parser(parser, "list", ["ls"], textwrap.dedent("""
     Shows a list of known patchsets. The current patchset will be marked. The
     list also shows the base and last commits as well as the number of commits.
     """))
@@ -96,7 +97,7 @@ def setup_parser_list(parser: Any) -> None:
 
 
 def setup_parser_cover(parser: Any) -> None:
-    sp = add_parser(parser, "cover", textwrap.dedent("""
+    sp = add_parser(parser, "cover", ["co"], textwrap.dedent("""
     Shows or changes the description of the patchset. This description
     will be used for cover-letter.
     """))
@@ -136,7 +137,7 @@ def setup_parser_cover(parser: Any) -> None:
 
 
 def setup_parser_export(parser: Any) -> None:
-    sp = add_parser(parser, "export", textwrap.dedent("""
+    sp = add_parser(parser, "export", ["ex"], textwrap.dedent("""
     Prepares patches for e-mail submission. The description for the patchset
     will be taken from the cover tag (see `cover' subcommand). The To and Сс
     fields will be taken from the config (see `config' subcommad).
@@ -206,7 +207,7 @@ def setup_parser_export(parser: Any) -> None:
 
 
 def setup_parser_send(parser: Any) -> None:
-    sp = add_parser(parser, "send", textwrap.dedent("""
+    sp = add_parser(parser, "send", ["se"], textwrap.dedent("""
     Sends patches by e-mail. It takes the patches given on the command line and
     emails them out. Patches can be specified as files, directories (which will
     send all files in the directory).
@@ -220,7 +221,7 @@ def setup_parser_send(parser: Any) -> None:
 
 
 def setup_parser_create(parser: Any) -> None:
-    sp = add_parser(parser, "create", textwrap.dedent("""
+    sp = add_parser(parser, "create", ["cr"], textwrap.dedent("""
     Creates branch for a new patchset. The new branch will be created with v1
     version. the version and cover can be overwritten if commits are imported
     from mbox file.
@@ -262,7 +263,7 @@ def setup_parser_create(parser: Any) -> None:
 
 
 def setup_parser_remove(parser: Any) -> None:
-    sp = add_parser(parser, "remove", textwrap.dedent("""
+    sp = add_parser(parser, "remove", ["rm"], textwrap.dedent("""
     Permanently remove all versions of patchset or just single version.
     """))
     sp.add_argument(
@@ -274,7 +275,7 @@ def setup_parser_remove(parser: Any) -> None:
 
 
 def setup_parser_config(parser: Any) -> None:
-    sp = add_parser(parser, "config", textwrap.dedent("""
+    sp = add_parser(parser, "config", [], textwrap.dedent("""
     Changes options of the patchset. You can always change or delete To and Cc
     fields using the `git config -e'.
     """))
@@ -292,7 +293,7 @@ def setup_parser_config(parser: Any) -> None:
 
 
 def setup_parser_import(parser: Any) -> None:
-    sp = add_parser(parser, "import", textwrap.dedent("""
+    sp = add_parser(parser, "import", ["am"], textwrap.dedent("""
     Imports a patchset from a set of files obtained by the git-format-patch(1)
     utility.
     """))
