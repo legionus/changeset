@@ -44,6 +44,21 @@ def get_cover_lines(covertag: str) -> List[str]:
     return lines
 
 
+def set_cover_tag(covertag: str, coverobj: str, covermsg: str) -> int:
+    res = cs.create_tag(covertag, coverobj, covermsg)
+
+    if isinstance(res, cs.Error):
+        logger.critical(res.message)
+        return cs.EX_FAILURE
+
+    if covertag.startswith("refs/tags/"):
+        covertag = covertag[len("refs/tags/") :]
+
+    cs.show_warning(f"Cover tag '{covertag}' updated (now {coverobj}).")
+
+    return cs.EX_SUCCESS
+
+
 def main(cmdargs: argparse.Namespace) -> int:
     ref: cs.PatchRef | cs.Error
 
@@ -74,16 +89,10 @@ def main(cmdargs: argparse.Namespace) -> int:
             logger.critical(nref.message)
             return cs.EX_FAILURE
 
-        res = cs.create_tag(ref.covertag, nref.object, covermsg)
-
-        if isinstance(res, cs.Error):
-            logger.critical(res.message)
-            return cs.EX_FAILURE
-
-        coverobj = nref.object
+        return set_cover_tag(ref.covertag, nref.object, covermsg)
 
     elif cmdargs.use_commit:
-        coverobj = cmdargs.use_commit
+        return set_cover_tag(ref.covertag, cmdargs.use_commit, covermsg)
 
     with tempfile.NamedTemporaryFile(mode="w") as fp:
         fp.write(covermsg)
@@ -96,11 +105,9 @@ def main(cmdargs: argparse.Namespace) -> int:
                 covermsg = f.read().strip()
 
     if covermsg_changed:
-        res = cs.create_tag(ref.covertag, coverobj, covermsg)
-
-        if isinstance(res, cs.Error):
-            logger.critical(res.message)
-            return cs.EX_FAILURE
+        res = set_cover_tag(ref.covertag, coverobj, covermsg)
+        if res != cs.EX_SUCCESS:
+            return res
 
         cs.show_warning("Cover message has been updated.")
     else:
