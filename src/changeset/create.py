@@ -14,8 +14,11 @@ logger = cs.logger
 
 def main(cmdargs: argparse.Namespace) -> int:
     covermsg = cs.cover.default_covermsg
+    covercommit = "HEAD^{}"
 
-    if len(cmdargs.newname) == 0:
+    create_newversion = len(cmdargs.newname) == 0
+
+    if create_newversion:
         curref = cs.get_current_patchref()
 
         if isinstance(curref, cs.Error):
@@ -23,6 +26,7 @@ def main(cmdargs: argparse.Namespace) -> int:
             return cs.EX_FAILURE
 
         cmdargs.newname = curref.patch_name
+        covercommit = curref.patch_base
 
         lines = get_cover_lines(curref.covertag)
 
@@ -55,15 +59,28 @@ def main(cmdargs: argparse.Namespace) -> int:
 
     newbranch = f"patchset/{cmdargs.newname}/v{cmdargs.newversion}"
 
-    ecode, _, err = cs.git_run_command(["switch", "--create", newbranch])
-    if ecode != cs.EX_SUCCESS:
-        cs.show_critical(err)
-        logger.critical("Unable to create new branch: %s", newbranch)
-        return ecode
+    if create_newversion:
+        ecode, _, err = cs.git_run_command(["branch", "--copy", newbranch])
+        if ecode != cs.EX_SUCCESS:
+            cs.show_critical(err)
+            logger.critical("Unable to copy branch: %s", newbranch)
+            return ecode
+
+        ecode, _, err = cs.git_run_command(["switch", newbranch])
+        if ecode != cs.EX_SUCCESS:
+            cs.show_critical(err)
+            logger.critical("Unable to change the branch: %s", newbranch)
+            return ecode
+    else:
+        ecode, _, err = cs.git_run_command(["switch", "--create", newbranch])
+        if ecode != cs.EX_SUCCESS:
+            cs.show_critical(err)
+            logger.critical("Unable to create new branch: %s", newbranch)
+            return ecode
 
     logger.info("Switched to a new branch '%s'", newbranch)
 
-    res = cs.create_tag(f"{newbranch}/cover", "HEAD^{}", covermsg)
+    res = cs.create_tag(f"{newbranch}/cover", covercommit, covermsg)
 
     if isinstance(res, cs.Error):
         cs.show_critical(res.message)
