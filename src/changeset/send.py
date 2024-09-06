@@ -30,7 +30,6 @@ def main(cmdargs: argparse.Namespace) -> int:
             "--to",
             " ",
             "--confirm=always",
-            "--format-patch",
             "--suppress-from",
         ]
         + cmdargs.filename
