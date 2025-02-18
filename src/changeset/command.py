@@ -156,6 +156,14 @@ def setup_parser_export(parser: Any) -> None:
         ),
     )
     sp.add_argument(
+        "--force-version",
+        dest="force_version",
+        action="store",
+        metavar="<number>",
+        default=None,
+        help="force to use <number> as a patchset version.",
+    )
+    sp.add_argument(
         "--resend",
         dest="tag_resend",
         action="store_true",

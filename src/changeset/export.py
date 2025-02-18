@@ -94,12 +94,17 @@ def main(cmdargs: argparse.Namespace) -> int:
     if fullname.startswith("refs/heads/"):
         fullname = fullname[len("refs/heads/") :]
 
+    version = ref.patch_vers[: ref.patch_vers.index(".")]
+
+    if cmdargs.force_version is not None:
+        version = str(int(cmdargs.force_version))
+
     args = [
         "format-patch",
         "--thread",
         "--minimal",
         "--reroll-count",
-        ref.patch_vers[: ref.patch_vers.index(".")],
+        version,
     ]
 
     if cmdargs.in_reply_to:
