@@ -78,7 +78,7 @@ def main(cmdargs: argparse.Namespace) -> int:
             logger.critical("Unable to create new branch: %s", newbranch)
             return ecode
 
-    logger.info("Switched to a new branch '%s'", newbranch)
+    logger.critical("Switched to a new branch '%s'", newbranch)
 
     res = cs.create_tag(f"{newbranch}/cover", covercommit, covermsg)
 
@@ -87,7 +87,7 @@ def main(cmdargs: argparse.Namespace) -> int:
         logger.critical("Unable to create cover tag: %s/cover", newbranch)
         return cs.EX_FAILURE
 
-    logger.info("New patchset created: '%s'", newbranch)
+    logger.critical("New patchset created: '%s'", newbranch)
     return cs.EX_SUCCESS
 
 
