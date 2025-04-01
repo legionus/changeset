@@ -16,6 +16,11 @@ def main(cmdargs: argparse.Namespace) -> int:
     covermsg = cs.cover.default_covermsg
     covercommit = "HEAD^{}"
 
+    if len(cmdargs.newname) == 0 and len(cmdargs.import_ref) > 0:
+        logger.warning("There is no name for the import. Use HEAD.")
+        cmdargs.newname = cmdargs.import_ref
+        cmdargs.import_ref = "HEAD"
+
     create_newversion = len(cmdargs.newname) == 0
 
     if create_newversion:
@@ -51,6 +56,14 @@ def main(cmdargs: argparse.Namespace) -> int:
             logger.critical("It's not clear what you want to achieve.")
             return cs.EX_FAILURE
 
+    elif len(cmdargs.import_ref) > 0:
+        ref = cs.git_get_describe("HEAD~")
+
+        if not isinstance(ref, cs.Error):
+            covercommit = ref.object
+
+        cmdargs.newversion = "0.0"
+
     if len(cmdargs.newname) == 0:
         logger.critical("Empty branch name is not allowed.")
         return cs.EX_FAILURE
@@ -71,6 +84,14 @@ def main(cmdargs: argparse.Namespace) -> int:
             cs.show_critical(err)
             logger.critical("Unable to change the branch: %s", newbranch)
             return ecode
+
+    elif len(cmdargs.import_ref) > 0:
+        ecode, _, err = cs.git_run_command(["switch", "--create", newbranch, cmdargs.import_ref])
+        if ecode != cs.EX_SUCCESS:
+            cs.show_critical(err)
+            logger.critical("Unable to import branch: %s", cmdargs.import_ref)
+            return ecode
+
     else:
         ecode, _, err = cs.git_run_command(["switch", "--create", newbranch])
         if ecode != cs.EX_SUCCESS:

@@ -258,6 +258,15 @@ def setup_parser_create(parser: Any) -> None:
         help="create a new version and increment minor (internal) version number.",
     )
     sp.add_argument(
+        "-I",
+        "--import",
+        dest="import_ref",
+        action="store",
+        default="",
+        metavar="BASEREF",
+        help="create a new version based on BASEREF.",
+    )
+    sp.add_argument(
         "newname",
         nargs="?",
         default="",
