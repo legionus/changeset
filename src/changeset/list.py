@@ -9,7 +9,6 @@ import argparse
 from typing import Iterable
 
 from termcolor import colored
-from termcolor._types import Attribute
 
 import changeset as cs
 
@@ -36,7 +35,7 @@ def main(cmdargs: argparse.Namespace) -> int:
         elif not ref.archived:
             continue
 
-        attrs: Iterable[Attribute] = []
+        attrs: Iterable[str] = []
 
         if cur_fullname == ref.fullname:
             mark = ">"
